@@ -3366,6 +3366,11 @@ function getTopicsForSrsReview(deadline) {
     // --- NOVAS FUNÇÕES DE DADOS ---
        async function loadAllData(showOverview = false) {
       try {
+        // --- NOVO: Memoriza a posição da rolagem ANTES de atualizar ---
+        const listContainer = document.getElementById("topics-list-container");
+        const savedScroll = listContainer ? listContainer.scrollTop : 0;
+        // --------------------------------------------------------------
+
         showSection("loading-message");
         await loadTopics(); // Carrega tópicos e userGoals (garante currentUserGoals está preenchido)
         await loadGlobalMetas(); // Carrega globalMetas
@@ -3374,6 +3379,12 @@ function getTopicsForSrsReview(deadline) {
         populateDisciplineFilter(); // Garante que o filtro de disciplina esteja preenchido
         displayTopicsList(); // Redesenha a lista de tópicos
         updateTopicCounter();
+
+        // --- NOVO: Restaura a posição da rolagem DEPOIS de atualizar ---
+        if (listContainer) {
+            listContainer.scrollTop = savedScroll;
+        }
+        // ---------------------------------------------------------------
 
         // REMOVIDO: loadConfig() não deve ser chamada aqui. Ela é chamada por initializeConfigView()
         // quando o modal de configurações da agenda é realmente aberto.
