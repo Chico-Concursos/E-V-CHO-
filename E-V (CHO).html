@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Controle de Progresso - Edital Polícia Penal</title>
+  <title>Controle de Progresso - Edital</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
   /* --- ESTILO PARA O NOVO TÍTULO --- */
@@ -238,7 +238,8 @@ header h1 {
     #main-container {
       display: flex;
       flex-direction: column;
-      height: 650px;
+      /* Muda de altura fixa (650px) para cálculo dinâmico: 100% da tela menos cabeçalho */
+      height: calc(100vh - 240px); 
       gap: 12px;
     }
     .content-area {
@@ -1877,6 +1878,146 @@ header h1 {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
 }
 /* --- FIM DO ESTILO --- */
+/* --- NOVOS ESTILOS PARA BOTÕES DA AGENDA --- */
+/* --- NOVOS ESTILOS PARA BOTÕES DA AGENDA --- */
+
+/* 1. Regra Geral: Força TODOS os botões da barra (Texto e Ícones) a terem a mesma altura */
+.agenda-toolbar button {
+  height: 20px !important;    /* Altura fixa igual para todos */
+  max-height: 20px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  vertical-align: middle !important; /* Garante alinhamento na linha */
+  margin-bottom: 0 !important;
+}
+
+/* 2. Regra Específica: Botões só de ícone ficam quadrados */
+.btn-icon-only {
+  width: 20px !important;      /* Largura igual à altura */
+  padding: 0 !important;       /* Sem preenchimento interno */
+  min-width: 20px !important;
+  font-size: 1rem !important;
+}
+
+/* --- CORREÇÃO: Botão Fechar do Modal (X) --- */
+.btn-close-absolute {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  z-index: 100;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #7A0000;
+  color: white;
+  border: 1px solid #ff4d4d;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s;
+}
+.btn-close-absolute:hover {
+  transform: scale(1.1);
+  background: #a10000;
+}
+
+/* --- ESTILO PARA O NOVO MODAL DE ESCOLHA DE GERAÇÃO --- */
+.generate-options-container {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  margin-top: 20px;
+}
+.option-card {
+  background: #222;
+  border: 1px solid #444;
+  border-radius: 8px;
+  padding: 20px;
+  width: 180px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+.option-card:hover {
+  border-color: #D2AC47;
+  background: #2a2a2a;
+  transform: translateY(-3px);
+}
+.option-card i {
+  font-size: 2rem;
+  margin-bottom: 10px;
+  color: #F7EF8A;
+}
+.option-card h4 {
+  color: #fff;
+  margin-bottom: 5px;
+}
+.option-card p {
+  font-size: 0.8rem;
+  color: #aaa;
+}
+
+/* Efeito de Tooltip (Nome aparece ao passar o mouse) */
+/* --- EFEITO DE TOOLTIP (CORRIGIDO: Aparece ABAIXO do botão) --- */
+.tooltip-btn {
+  position: relative;
+}
+
+.tooltip-btn:hover::after {
+  content: attr(data-title);
+  position: absolute;
+  
+  /* MUDANÇA PRINCIPAL: Define o topo como referência, empurrando para baixo */
+  top: 120%; 
+  bottom: auto; /* Anula a regra anterior que jogava para cima */
+  
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1a1a1a; /* Fundo levemente mais escuro para leitura */
+  color: #F7EF8A;
+  border: 1px solid #D2AC47;
+  padding: 6px 10px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  z-index: 2000; /* Z-index alto para ficar sobre a grade da agenda */
+  box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+  pointer-events: none;
+  animation: fadeInDown 0.2s ease-out;
+}
+
+/* Nova animação: Aparece deslizando levemente para baixo */
+@keyframes fadeInDown {
+  from { 
+    opacity: 0; 
+    transform: translateX(-50%) translateY(-5px); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateX(-50%) translateY(0); 
+  }
+}
+
+/* Agrupamento dos botões de Gerar */
+.generate-group {
+  display: flex;
+  background: #333;
+  border-radius: 5px;
+  overflow: hidden;
+  border: 1px solid #555;
+}
+.generate-group button {
+  border-radius: 0 !important;
+  border: none !important;
+  border-right: 1px solid #444 !important;
+  margin: 0 !important;
+}
+.generate-group button:last-child {
+  border-right: none !important;
+}
   </style>
 </head>
 <body>
@@ -3364,14 +3505,18 @@ function getTopicsForSrsReview(deadline) {
 }
 
     // --- NOVAS FUNÇÕES DE DADOS ---
-       async function loadAllData(showOverview = false) {
+   // --- NOVAS FUNÇÕES DE DADOS ---
+    async function loadAllData(showOverview = false, silent = false) {
       try {
         // --- NOVO: Memoriza a posição da rolagem ANTES de atualizar ---
         const listContainer = document.getElementById("topics-list-container");
         const savedScroll = listContainer ? listContainer.scrollTop : 0;
         // --------------------------------------------------------------
 
-        showSection("loading-message");
+        if (!silent) {
+            showSection("loading-message");
+        }
+        
         await loadTopics(); // Carrega tópicos e userGoals (garante currentUserGoals está preenchido)
         await loadGlobalMetas(); // Carrega globalMetas
         
@@ -4823,7 +4968,7 @@ async function quickToggleEstudo(sequence, element) {
     element.classList.remove('loading');
     element.classList.add('success');
     showNotification('Status de estudo atualizado!', 'success');
-    await loadAllData(); // Recarrega a lista
+    await loadAllData(false, true); // Recarrega a lista silenciosamente
     // --- Fim da Modificação ---
     
   } catch (error) {
@@ -4875,7 +5020,7 @@ async function quickToggleQuestoes(sequence, element) {
     element.classList.remove('loading');
     element.classList.add('success');
     showNotification('Status de questões atualizado!', 'success');
-    await loadAllData();
+    await loadAllData(false, true);
     // --- Fim da Modificação ---
     
   } catch (error) {
@@ -4923,7 +5068,7 @@ async function quickToggleQuestoes(sequence, element) {
     element.classList.remove('loading');
     element.classList.add('success');
     showNotification('Status de flashcards atualizado!', 'success');
-    await loadAllData();
+    await loadAllData(false, true);
     
   } catch (error)
 {
@@ -5151,88 +5296,111 @@ async function saveRevisaoPopup(sequence) {
     function generateWeeklyView() {
       return `
         <div class="weekly-agenda">
-    <div class="agenda-toolbar" style="display: flex; align-items: center; flex-wrap: wrap; gap: 25px; margin-bottom: 15px;">
+    <div class="agenda-toolbar" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 15px; background: rgba(255,255,255,0.05); padding: 8px; border-radius: 8px;">
     
-    <!-- 1º Grupo: Botões de Ação -->
-    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-        <button onclick="generateAutoAgenda()" class="btn-save">
-            <i class="fas fa-robot"></i> Gerar Agenda Automática
+    <div style="display: flex; gap: 8px; align-items: center;">
+        
+        <button onclick="openGenerateOptionsModal()" class="btn-save tooltip-btn" data-title="Gerar Ag. Automática">
+            <i class="fas fa-robot"></i> Gerar Agenda
         </button>
-        <button onclick="addNewBlock()" class="btn-edit">
-            <i class="fas fa-plus"></i> Novo Bloco
+
+        <button onclick="reschedulePendingFromYesterday()" class="btn-edit btn-icon-only tooltip-btn" data-title="Resgatar pendências de ontem" style="background: linear-gradient(135deg, #FF9800, #F57C00); color: white;">
+            <i class="fas fa-history"></i>
         </button>
-        <button onclick="clearAgenda()" class="btn-reset">
-            <i class="fas fa-trash"></i> Limpar
+
+        <button onclick="addNewBlock()" class="btn-edit btn-icon-only tooltip-btn" data-title="Novo Bloco">
+            <i class="fas fa-plus"></i>
         </button>
-        <button onclick="saveAgenda()" class="btn-save">
-            <i class="fas fa-save"></i> Salvar Agenda
+
+        <button onclick="clearAgenda()" class="btn-reset btn-icon-only tooltip-btn" data-title="Limpar Agenda">
+            <i class="fas fa-trash"></i>
+        </button>
+
+        <button onclick="saveAgenda()" class="btn-save btn-icon-only tooltip-btn" data-title="Salvar Agenda">
+            <i class="fas fa-save"></i>
         </button>
     </div>
 
-    <!-- 2º Grupo: Seletores de Período -->
-    <div style="display: flex; align-items: center; gap: 10px;">
-        <strong style="color: #F7EF8A;">Mostrar períodos:</strong>
-        <label style="color: #fff; display:flex; align-items:center; gap: 4px;"><input type="checkbox" id="periodo-manha" checked> Manhã</label>
-        <label style="color: #fff; display:flex; align-items:center; gap: 4px;"><input type="checkbox" id="periodo-tarde" checked> Tarde</label>
-        <label style="color: #fff; display:flex; align-items:center; gap: 4px;"><input type="checkbox" id="periodo-noite" checked> Noite</label>
-    </div>
-
-    <!-- 3º Grupo: Data da Semana -->
-    <div id="week-date-range" style="color: #Fff; font-weight: bold;">
-        <!-- A data será inserida aqui -->
+    <div style="display: flex; gap: 15px; align-items: center;">
+        <div style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem;">
+            <label style="color: #fff; cursor: pointer;"><input type="checkbox" id="periodo-manha" checked> Manhã</label>
+            <label style="color: #fff; cursor: pointer;"><input type="checkbox" id="periodo-tarde" checked> Tarde</label>
+            <label style="color: #fff; cursor: pointer;"><input type="checkbox" id="periodo-noite" checked> Noite</label>
+        </div>
+        <div id="week-date-range" style="color: #Fff; font-weight: bold; font-size: 0.85rem; border-left: 1px solid #555; padding-left: 10px;"></div>
     </div>
 
 </div>
-              <!-- NOVO: Container com rolagem -->
          <div class="week-grid-container">
-  ${generateWeekGrid()}
-</div>
+            ${generateWeekGrid()}
+         </div>
           </div>
-          <!-- Modal para adicionar/editar bloco -->
+
+          <div id="generate-options-modal" class="modal-backdrop" style="display: none; z-index: 2000;">
+            <div class="modal" style="max-width: 500px;">
+                <button class="btn-close-absolute" onclick="closeGenerateOptionsModal()" style="top: 10px; right: 10px; width: 24px; height: 24px;">X</button>
+                <h3 style="text-align: center; color: #F7EF8A; margin-bottom: 5px;"><i class="fas fa-robot"></i> Gerar Agenda Automática</h3>
+                <p style="text-align: center; color: #ccc; margin-bottom: 20px;">Escolha o tipo de agendamento:</p>
+                
+                <div class="generate-options-container">
+                    <div class="option-card" onclick="generateAutoAgenda('daily'); closeGenerateOptionsModal();">
+                        <i class="fas fa-calendar-day" style="color: #4CAF50;"></i>
+                        <h4>Apenas Hoje</h4>
+                        <p>Preenche os horários vazios do dia atual.</p>
+                    </div>
+                    <div class="option-card" onclick="generateAutoAgenda('weekly'); closeGenerateOptionsModal();">
+                        <i class="fas fa-calendar-week" style="color: #2196F3;"></i>
+                        <h4>Semana Toda</h4>
+                        <p>Planeja a semana completa baseada nas metas.</p>
+                    </div>
+                </div>
+            </div>
+          </div>
+
           <div id="block-modal" class="modal-backdrop" style="display: none;">
             <div class="modal" style="max-width: 500px;">
-              <h3 id="block-modal-title"><i class="fas fa-plus"></i> Adicionar Bloco de Estudo</h3>
+              <h3 id="block-modal-title"><i class="fas fa-plus"></i> Adicionar Bloco</h3>
 			  <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-        <div class="form-field" style="flex: 1;">
-          <label>Dia da Semana:</label>
-          <select id="block-dia" style="width: 100%; padding: 8px; border-radius: 4px; background: #222; color: #fff; border: 1px solid #555;">
-            <option value="Segunda">Segunda</option>
-            <option value="Terça">Terça</option>
-            <option value="Quarta">Quarta</option>
-            <option value="Quinta">Quinta</option>
-            <option value="Sexta">Sexta</option>
-            <option value="Sábado">Sábado</option>
-            <option value="Domingo">Domingo</option>
-          </select>
-        </div>
-        <div class="form-field" style="flex: 1;">
-          <label>Período:</label>
-          <select id="block-periodo" style="width: 100%; padding: 8px; border-radius: 4px; background: #222; color: #fff; border: 1px solid #555;">
-            <option value="Manhã">Manhã</option>
-            <option value="Tarde">Tarde</option>
-            <option value="Noite">Noite</option>
-          </select>
-        </div>
-      </div>
+                <div class="form-field" style="flex: 1;">
+                <label>Dia:</label>
+                <select id="block-dia" style="width: 100%; padding: 8px; background: #222; color: #fff; border: 1px solid #555; border-radius: 4px;">
+                    <option value="Segunda">Segunda</option>
+                    <option value="Terça">Terça</option>
+                    <option value="Quarta">Quarta</option>
+                    <option value="Quinta">Quinta</option>
+                    <option value="Sexta">Sexta</option>
+                    <option value="Sábado">Sábado</option>
+                    <option value="Domingo">Domingo</option>
+                </select>
+                </div>
+                <div class="form-field" style="flex: 1;">
+                <label>Período:</label>
+                <select id="block-periodo" style="width: 100%; padding: 8px; background: #222; color: #fff; border: 1px solid #555; border-radius: 4px;">
+                    <option value="Manhã">Manhã</option>
+                    <option value="Tarde">Tarde</option>
+                    <option value="Noite">Noite</option>
+                </select>
+                </div>
+            </div>
               <div class="form-field" style="margin-bottom: 15px;">
                 <label>Disciplina:</label>
-                <select id="block-disciplina" style="width: 100%; padding: 8px; border-radius: 4px; background: #222; color: #fff; border: 1px solid #555;">
-                  <option value="">Selecione uma disciplina</option>
+                <select id="block-disciplina" style="width: 100%; padding: 8px; background: #222; color: #fff; border: 1px solid #555; border-radius: 4px;">
+                  <option value="">Selecione...</option>
                 </select>
               </div>
               <div class="form-field" style="margin-bottom: 15px;">
                 <label>Tópico:</label>
-                <select id="block-topico" style="width: 100%; padding: 8px; border-radius: 4px; background: #222; color: #fff; border: 1px solid #555;">
-                  <option value="">Selecione um tópico</option>
+                <select id="block-topico" style="width: 100%; padding: 8px; background: #222; color: #fff; border: 1px solid #555; border-radius: 4px;">
+                  <option value="">Selecione...</option>
                 </select>
               </div>
               <div class="form-field" style="margin-bottom: 15px;">
                 <label>Horas:</label>
-                <input type="number" id="block-horas" min="0.5" max="8" step="0.5" value="2" style="width: 100%; padding: 8px; border-radius: 4px; background: #222; color: #fff; border: 1px solid #555;">
+                <input type="number" id="block-horas" min="0.5" max="8" step="0.5" value="2" style="width: 100%; padding: 8px; background: #222; color: #fff; border: 1px solid #555; border-radius: 4px;">
               </div>
               <div class="form-field" style="margin-bottom: 15px;">
                 <label>Prioridade:</label>
-                <select id="block-prioridade" style="width: 100%; padding: 8px; border-radius: 4px; background: #222; color: #fff; border: 1px solid #555;">
+                <select id="block-prioridade" style="width: 100%; padding: 8px; background: #222; color: #fff; border: 1px solid #555; border-radius: 4px;">
                   <option value="Alta">Alta</option>
                   <option value="Média" selected>Média</option>
                   <option value="Baixa">Baixa</option>
@@ -5240,11 +5408,10 @@ async function saveRevisaoPopup(sequence) {
               </div>
               <div class="modal-buttons">
                 <button class="btn-modal-cancel" onclick="closeBlockModal()">Cancelar</button>
-                <button class="btn-modal-confirm" onclick="saveBlockModal()">Salvar Bloco</button>
+                <button class="btn-modal-confirm" onclick="saveBlockModal()">Salvar</button>
               </div>
             </div>
           </div>
-		 </div>
       `;
     }
 
@@ -5802,16 +5969,23 @@ function updateAgendaData() {
   
   window.agendaData = agendaData;
 }
-async function generateAutoAgenda() {
-    const button = document.querySelector('.weekly-agenda .btn-save');
-    const originalText = button.innerHTML;
-    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Gerando...';
+// Função atualizada para aceitar modo 'weekly' ou 'daily'
+// Função atualizada para aceitar modo 'weekly' ou 'daily' (CORRIGIDA)
+async function generateAutoAgenda(mode = 'weekly') {
+    // Feedback visual via notificação (removemos a dependência do botão antigo para evitar erro)
+    if(mode === 'daily') {
+       showNotification('Gerando agenda para hoje...', 'success');
+    } else {
+       showNotification('Gerando agenda semanal...', 'success');
+    }
 
     try {
-        document.querySelectorAll('.slot-content').forEach(slot => slot.innerHTML = '');
+        // Se for modo semanal, limpa tudo.
+        if (mode === 'weekly') {
+            document.querySelectorAll('.slot-content').forEach(slot => slot.innerHTML = '');
+        }
 
         const config = JSON.parse(localStorage.getItem('agendaConfig') || '{}');
-        // ... (o resto das variáveis de config continuam iguais) ...
         const diasSemanaConfig = parseInt(config.diasSemana || '5');
         const topicosDiaConfig = parseInt(config.topicosDia || '0');
         const focoPrincipalConfig = config.focoPrincipal || 'balanceado';
@@ -5820,58 +5994,63 @@ async function generateAutoAgenda() {
         const periodosConfig = config.periodos || ['manha', 'tarde', 'noite'];
         const baseRevisaoConfig = config.baseRevisao || '1';
 
-        // --- NOVA LÓGICA: Determinar a Data Final (Deadline) ---
         const deadlineDate = currentUserGoals['Meta Data Conclusão'] 
             ? new Date(currentUserGoals['Meta Data Conclusão']) 
             : (globalMetas['Data_Prova'] ? new Date(globalMetas['Data_Prova'].value) : null);
         if (deadlineDate) {
-            deadlineDate.setHours(23, 59, 59, 999); // Garante que o dia final seja incluído
+            deadlineDate.setHours(23, 59, 59, 999);
         }
         
         const today = new Date();
-        const todayIndex = today.getDay() === 0 ? 6 : today.getDay() - 1;
-        const todosOsDiasDaSemana = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo'];
+        const weekdays = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+        const todayName = weekdays[today.getDay()];
         
-        const diasDeEstudoConfigurados = todosOsDiasDaSemana.slice(0, diasSemanaConfig);
-        const diasDeEstudoRestantes = diasDeEstudoConfigurados.filter((_, index) => index >= todayIndex);
+        // Lógica para definir quais dias vamos preencher
+        let diasParaPreencher = [];
+        
+        if (mode === 'daily') {
+            // Se for diário, preenchemos APENAS o dia de hoje
+            diasParaPreencher = [todayName];
+        } else {
+            // Se for semanal, lógica original
+            const todayIndex = today.getDay() === 0 ? 6 : today.getDay() - 1; 
+            const todosOsDiasDaSemana = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo'];
+            const diasDeEstudoConfigurados = todosOsDiasDaSemana.slice(0, diasSemanaConfig);
+            diasParaPreencher = diasDeEstudoConfigurados.filter((_, index) => index >= todayIndex);
+        }
 
-        if (diasDeEstudoRestantes.length === 0) {
-            showNotification('Não há mais dias de estudo configurados para esta semana.', 'error');
-            button.innerHTML = originalText;
+        if (diasParaPreencher.length === 0) {
+            showNotification('Não há dias configurados para gerar nesta seleção.', 'error');
             return;
         }
 
         const availableSlots = [];
-        diasDeEstudoRestantes.forEach(day => {
+        diasParaPreencher.forEach(day => {
             if (periodosConfig.includes('manha')) availableSlots.push({ dia: day, periodo: 'Manhã' });
             if (periodosConfig.includes('tarde')) availableSlots.push({ dia: day, periodo: 'Tarde' });
             if (periodosConfig.includes('noite')) availableSlots.push({ dia: day, periodo: 'Noite' });
         });
 
         if (availableSlots.length === 0) {
-            showNotification('Nenhum período de estudo disponível para os dias restantes da semana.', 'error');
-            button.innerHTML = originalText;
+            showNotification('Nenhum slot disponível nos períodos selecionados.', 'error');
             return;
         }
 
+        // Cálculo de metas
         let newTopicsTarget = 0;
         if (baseAgendaConfig !== 'nenhum') {
             newTopicsTarget = getDailyStudyTarget(baseAgendaConfig, topicosDiaConfig, diasSemanaConfig);
         }
         
         let revisionTarget = 0;
-        // A lógica de `switch` para `baseRevisaoConfig` permanece a mesma...
         switch (baseRevisaoConfig) {
             case 'srs':
-                // Agora passamos o deadline para a função do SRS
                 revisionTarget = getTopicsForSrsReview(deadlineDate).length;
                 break;
             case 'medias-recomendadas-revisao':
-                const diasParaProvaRecomendado = globalMetas['Dias_p_Prova']?.value || 0;
+                const diasParaProva = globalMetas['Dias_p_Prova']?.value || 0;
                 const totalRevisoes = globalMetas['Total_Temas_Revisao_Edital']?.value || totalTopics;
-                if (diasParaProvaRecomendado > 0) {
-                    revisionTarget = Math.ceil(totalRevisoes / diasParaProvaRecomendado);
-                }
+                if (diasParaProva > 0) revisionTarget = Math.ceil(totalRevisoes / diasParaProva);
                 break;
             case 'medias-personalizadas-revisao':
                 const mediasPersonalizadas = calcularMediasPersonalizadas();
@@ -5881,9 +6060,8 @@ async function generateAutoAgenda() {
                 revisionTarget = parseInt(baseRevisaoConfig) || 0;
                 break;
         }
-
+        
         if (focoPrincipalConfig === 'chico-concursos') {
-            // ... (lógica do Chico Concursos permanece a mesma) ...
             const totalDailyBlocks = newTopicsTarget + revisionTarget;
             const studyPhase = calculateStudyPhase();
             let newContentProportion = 0.5;
@@ -5894,26 +6072,35 @@ async function generateAutoAgenda() {
             revisionTarget = Math.ceil(totalDailyBlocks * (1 - newContentProportion));
         }
 
-        if (newTopicsTarget <= 0 && revisionTarget <= 0) {
-            showNotification('Nenhuma meta de estudo ou revisão definida para gerar a agenda.', 'error');
-            button.innerHTML = originalText;
-            return;
-        }
-
-        // --- MODIFICAÇÃO: Passando o deadline para a próxima função ---
         const { newTopics, reviewTopics } = prepareTopicsForScheduling(focoPrincipalConfig, distribuicaoConfig, allTopics, globalMetas, deadlineDate);
 
-        // ... (o resto da função para distribuir os tópicos continua igual) ...
-        const totalNewTopicsToSchedule = newTopicsTarget * diasDeEstudoRestantes.length;
-        const totalRevisionsToSchedule = (baseRevisaoConfig === 'srs') ? revisionTarget : (revisionTarget * diasDeEstudoRestantes.length);
+        const multiplier = diasParaPreencher.length;
+        const totalNewTopicsToSchedule = newTopicsTarget * multiplier;
+        let totalRevisionsToSchedule = 0;
+        
+        if (baseRevisaoConfig === 'srs') {
+             totalRevisionsToSchedule = mode === 'daily' ? Math.min(revisionTarget, 15) : revisionTarget;
+        } else {
+             totalRevisionsToSchedule = revisionTarget * multiplier;
+        }
 
-        const newAgendaData = [];
+        if (mode === 'daily') {
+             diasParaPreencher.forEach(day => {
+                ['Manhã', 'Tarde', 'Noite'].forEach(p => {
+                    const slot = document.getElementById(`slot-${day}-${p}`);
+                    if(slot) slot.innerHTML = '';
+                });
+             });
+             window.agendaData = window.agendaData.filter(item => item.DiaSemana !== todayName);
+        }
+
+        const newAgendaItems = []; 
         let currentSlotIndex = 0;
 
         for (let i = 0; i < totalNewTopicsToSchedule && i < newTopics.length; i++) {
             const topic = newTopics[i];
             const targetSlot = availableSlots[currentSlotIndex % availableSlots.length];
-            newAgendaData.push({
+            newAgendaItems.push({
                 Data: getCorrectDateForDayOfWeek(targetSlot.dia), DiaSemana: targetSlot.dia, Periodo: targetSlot.periodo,
                 Disciplina: topic.Disciplinas, TopicosSugeridos: `${topic.Seq} - ${topic.Tópicos}`,
                 Horas: 1, Concluido: 'Não', Prioridade: 'Alta',
@@ -5925,7 +6112,7 @@ async function generateAutoAgenda() {
         for (let i = 0; i < totalRevisionsToSchedule && i < reviewTopics.length; i++) {
             const topic = reviewTopics[i];
             const targetSlot = availableSlots[currentSlotIndex % availableSlots.length];
-            newAgendaData.push({
+            newAgendaItems.push({
                 Data: getCorrectDateForDayOfWeek(targetSlot.dia), DiaSemana: targetSlot.dia, Periodo: targetSlot.periodo,
                 Disciplina: topic.Disciplinas, TopicosSugeridos: `${topic.Seq} - ${topic.Tópicos}`,
                 Horas: 1, Concluido: 'Não', Prioridade: 'Média',
@@ -5934,16 +6121,69 @@ async function generateAutoAgenda() {
             currentSlotIndex++;
         }
 
-        window.agendaData = newAgendaData;
-        loadExistingBlocks();
-        showNotification('Agenda inteligente gerada com sucesso!', 'success');
+        if (mode === 'weekly') {
+             window.agendaData = newAgendaItems;
+        } else {
+             window.agendaData = [...window.agendaData, ...newAgendaItems];
+        }
+
+        loadExistingBlocks(); 
+        showNotification(mode === 'daily' ? 'Agenda de hoje gerada!' : 'Agenda semanal gerada!', 'success');
 
     } catch (error) {
-        console.error('Erro ao gerar agenda inteligente:', error);
-        showNotification(`Ocorreu um erro: ${error.message}`, 'error');
-    } finally {
-        button.innerHTML = originalText;
+        console.error('Erro:', error);
+        showNotification(`Erro: ${error.message}`, 'error');
     }
+}
+
+// --- NOVA FUNÇÃO: RESGATAR PENDÊNCIAS ---
+function reschedulePendingFromYesterday() {
+    if (!window.agendaData || window.agendaData.length === 0) {
+        showNotification('Não há dados na agenda para verificar.', 'error');
+        return;
+    }
+
+    showConfirm('Deseja mover todas as matérias não concluídas de ONTEM para HOJE?', (confirmed) => {
+        if (confirmed) {
+            const today = new Date();
+            const yesterday = new Date(today);
+            yesterday.setDate(today.getDate() - 1);
+            
+            const weekdays = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+            const todayName = weekdays[today.getDay()];
+            const yesterdayName = weekdays[yesterday.getDay()];
+            
+            let moveCount = 0;
+            
+            // Percorre a agenda procurando itens de ontem não concluídos
+            window.agendaData.forEach(item => {
+                // Verifica se é de ontem (pelo dia da semana ou data se disponível)
+                const isFromYesterday = item.DiaSemana === yesterdayName;
+                
+                if (isFromYesterday && item.Concluido !== 'Sim') {
+                    // Atualiza para hoje
+                    item.DiaSemana = todayName;
+                    item.Data = getCorrectDateForDayOfWeek(todayName);
+                    item.Prioridade = 'Alta'; // Aumenta prioridade pois está atrasado
+                    // Opcional: Adicionar um marcador visual no título
+                    if (!item.TopicosSugeridos.includes('(Atrasado)')) {
+                        item.TopicosSugeridos += ' (Atrasado)'; 
+                    }
+                    moveCount++;
+                }
+            });
+            
+            if (moveCount > 0) {
+                // Limpa a visualização atual e recarrega
+                document.querySelectorAll('.slot-content').forEach(slot => slot.innerHTML = '');
+                loadExistingBlocks();
+                showNotification(`${moveCount} itens atrasados movidos para hoje!`, 'success');
+                saveAgenda(); // Salva automaticamente
+            } else {
+                showNotification('Nenhuma pendência de ontem encontrada.', 'warning');
+            }
+        }
+    });
 }
     // ==================== FUNÇÕES DE GESTÃO ====================
 
@@ -6750,6 +6990,16 @@ function updatePeriodoVisibility() {
   localStorage.setItem('mostrarManha', mostrarManha);
   localStorage.setItem('mostrarTarde', mostrarTarde);
   localStorage.setItem('mostrarNoite', mostrarNoite);
+}
+// --- FUNÇÕES PARA O NOVO MENU DE GERAÇÃO ---
+function openGenerateOptionsModal() {
+    const modal = document.getElementById('generate-options-modal');
+    if(modal) modal.style.display = 'flex';
+}
+
+function closeGenerateOptionsModal() {
+    const modal = document.getElementById('generate-options-modal');
+    if(modal) modal.style.display = 'none';
 }
 </script>
   </script>
